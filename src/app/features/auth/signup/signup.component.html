@@ -1,0 +1,103 @@
+<div class="signup-page">
+  <div class="signup-card">
+    <h1>{{ 'SIGNUP.TITLE' | translate }}</h1>
+    <p>{{ 'SIGNUP.DESCRIPTION' | translate }}</p>
+
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+      <div class="grid">
+        <!-- First Name -->
+        <div class="form-group">
+          <label>{{ 'SIGNUP.FIRST_NAME' | translate }}</label>
+          <input type="text" formControlName="firstName" placeholder="{{ 'SIGNUP.PLACEHOLDER_FIRST_NAME' | translate }}">
+          <small *ngIf="f['firstName'].touched && f['firstName'].errors?.['required']">
+            First name is required
+          </small>
+          <small *ngIf="f['firstName'].touched && f['firstName'].errors?.['maxlength']">
+            Maximum 50 characters allowed
+          </small>
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group">
+          <label>{{ 'SIGNUP.LAST_NAME' | translate }}</label>
+          <input type="text" formControlName="lastName" placeholder="{{ 'SIGNUP.PLACEHOLDER_LAST_NAME' | translate }}">
+          <small *ngIf="f['lastName'].touched && f['lastName'].errors?.['required']">
+            Last name is required
+          </small>
+          <small *ngIf="f['lastName'].touched && f['lastName'].errors?.['maxlength']">
+            Maximum 50 characters allowed
+          </small>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label>{{ 'SIGNUP.EMAIL' | translate }}</label>
+        <input type="email" formControlName="email" placeholder="{{ 'SIGNUP.PLACEHOLDER_EMAIL' | translate }}">
+        <small *ngIf="f['email'].touched && f['email'].errors?.['required']">
+          Email is required
+        </small>
+        <small *ngIf="f['email'].touched && f['email'].errors?.['pattern']">
+          Enter a valid email address (e.g. john.doe@gmail.com)
+        </small>
+        <small *ngIf="f['email'].touched && f['email'].errors?.['maxlength']">
+          Email cannot exceed 100 characters
+        </small>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label>{{ 'SIGNUP.PASSWORD' | translate }}</label>
+        <input type="password" formControlName="password" placeholder="{{ 'SIGNUP.PLACEHOLDER_PASSWORD' | translate }}">
+        <small *ngIf="f['password'].touched && f['password'].errors?.['required']">
+          Password is required
+        </small>
+        <small *ngIf="f['password'].touched && f['password'].errors?.['minlength']">
+          Minimum 8 characters required
+        </small>
+        <small *ngIf="f['password'].touched && f['password'].errors?.['maxlength']">
+          Maximum 64 characters allowed
+        </small>
+        <small *ngIf="f['password'].touched && f['password'].errors?.['strongPassword']">
+          Must include uppercase, lowercase, number, and special character
+        </small>
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group">
+        <label>{{ 'SIGNUP.PHONE' | translate }}</label>
+        <div class="phone-input">
+          <select formControlName="countryCode">
+            <option value="+91">🇮🇳 India</option>
+            <option value="+1">🇺🇸 USA</option>
+            <option value="+44">🇬🇧 UK</option>
+            <option value="+61">🇦🇺 Australia</option>
+          </select>
+          <input type="text" formControlName="phone" placeholder="{{ 'SIGNUP.PLACEHOLDER_PHONE' | translate }}">
+        </div>
+        <small *ngIf="f['phone'].touched && f['phone'].errors?.['required']">
+          Phone number is required
+        </small>
+        <small *ngIf="f['phone'].touched && f['phone'].errors?.['pattern']">
+          Must be a 10-digit number
+        </small>
+      </div>
+
+      <!-- Role -->
+      <div class="grid">
+        <div class="form-group">
+          <label>{{ 'SIGNUP.ROLE' | translate }}</label>
+          <select formControlName="role">
+            <option value="ADMIN">{{ 'SIGNUP.ROLE_ADMIN' | translate }}</option>
+            <option value="EMPLOYEE">{{ 'SIGNUP.ROLE_EMPLOYEE' | translate }}</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="loading || signupForm.invalid">
+        {{ loading ? ('SIGNUP.CREATING' | translate) : ('SIGNUP.SUBMIT' | translate) }}
+      </button>
+    </form>
+  </div>
+</div>
+

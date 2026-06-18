@@ -1,0 +1,45 @@
+<nav class="navbar">
+  <div class="logo">ABC Solutions</div>
+  <div class="nav-links">
+    <ng-container *ngIf="!isLoggedIn()">
+      <a routerLink="/home" routerLinkActive="active-link">{{ 'NAVBAR.HOME' | translate }}</a>
+      <a routerLink="/login" routerLinkActive="active-link">{{ 'NAVBAR.LOGIN' | translate }}</a>
+      <a routerLink="/signup" class="signup-btn" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">{{ 'NAVBAR.SIGNUP' | translate }}</a>
+    </ng-container>
+
+    <ng-container *ngIf="isLoggedIn()">
+      <a routerLink="/analytics" routerLinkActive="active-link">{{ 'NAVBAR.ANALYTICS' | translate }}</a>
+      <a routerLink="/department" routerLinkActive="active-link">{{ 'NAVBAR.DEPARTMENT' | translate }}</a>
+      <a routerLink="/employees" routerLinkActive="active-link">{{ 'NAVBAR.EMPLOYEES' | translate }}</a>
+      <button class="logout-btn" (click)="showLogoutPopup = true">{{ 'NAVBAR.LOGOUT' | translate }}</button>
+    </ng-container>
+
+    <!-- Language Switcher -->
+    <select [value]="currentLang" (change)="changeLanguageEvent($event)">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option value="te">తెలుగు</option>
+      <option value="ta">தமிழ்</option>
+      <option value="ml">മലയാളം</option>
+      <option value="kn">ಕನ್ನಡ</option>
+      <option value="bn">বাংলা</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="de">Deutsch</option>
+      <option value="zh">中文</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+</nav>
+
+<!-- Centered Logout Confirmation Popup with Backdrop Blur -->
+<div class="modal-backdrop" *ngIf="showLogoutPopup" (click)="cancelLogout()">
+  <div class="confirm-popup" (click)="$event.stopPropagation()">
+    <p>{{ 'NAVBAR.CONFIRM_LOGOUT' | translate }}</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn" (click)="confirmLogout()">{{ 'NAVBAR.YES' | translate }}</button>
+      <button class="cancel-btn" (click)="cancelLogout()">{{ 'NAVBAR.NO' | translate }}</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,11 @@
+.main-container {
+
+  min-height: 100vh;
+
+  background: #f4f7fb;
+
+  padding-top: 80px;
+}
+main {
+  margin-top: 80px; /* adjust based on navbar height */
+}

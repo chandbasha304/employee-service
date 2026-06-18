@@ -1,0 +1,36 @@
+{
+  "compileOnSave": false,
+
+
+"compilerOptions": {
+  "target": "ES2022",
+  "module": "NodeNext",
+  "moduleResolution": "NodeNext",
+  "strict": true,
+  "skipLibCheck": true,
+  "experimentalDecorators": true,
+  "importHelpers": true,
+  "isolatedModules": true
+}
+
+
+
+
+
+,
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}

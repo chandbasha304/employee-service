@@ -1,0 +1,115 @@
+<div class="container-page card-ui animate-fade-in-up">
+  <div class="header-section-title">
+    <h2 class="page-title">{{ 'BULK_EDIT.TITLE' | translate }}</h2>
+    <p class="subtitle-text">{{ 'BULK_EDIT.SUBTITLE' | translate }}</p>
+  </div>
+
+  <form [formGroup]="employeesForm" class="bulk-form">
+    <div formArrayName="employees" class="form-array-container">
+      <div *ngFor="let emp of employeesArray.controls; let i = index" [formGroupName]="i" class="employee-card">
+        
+        <!-- Record badge header -->
+        <div class="card-header-row">
+          <span class="row-badge">{{ 'BULK_EDIT.RECORD_BADGE' | translate }} #{{ i + 1 }}</span>
+        </div>
+
+        <div class="card-grid-fields">
+          <!-- First Name -->
+          <div class="form-field">
+            <label>{{ 'EMPLOYEE_EDIT.FIRST_NAME' | translate }}</label>
+            <input formControlName="firstName" [placeholder]="'BULK_EDIT.PLACEHOLDER_FIRST_NAME' | translate" />
+            <small class="error-text" *ngIf="emp.get('firstName')?.invalid && emp.get('firstName')?.touched">
+              {{ 'BULK_EDIT.ERR_FIRST_NAME_REQUIRED' | translate }}
+            </small>
+          </div>
+
+          <!-- Last Name -->
+          <div class="form-field">
+            <label>{{ 'EMPLOYEE_EDIT.LAST_NAME' | translate }}</label>
+            <input formControlName="lastName" [placeholder]="'BULK_EDIT.PLACEHOLDER_LAST_NAME' | translate" />
+            <small class="error-text" *ngIf="emp.get('lastName')?.invalid && emp.get('lastName')?.touched">
+              {{ 'BULK_EDIT.ERR_LAST_NAME_REQUIRED' | translate }}
+            </small>
+          </div>
+
+          <!-- Email -->
+          <div class="form-field">
+            <label>{{ 'EMPLOYEE_EDIT.EMAIL' | translate }}</label>
+            <input type="email" formControlName="email" [placeholder]="'BULK_EDIT.PLACEHOLDER_EMAIL' | translate" />
+            <small class="error-text" *ngIf="emp.get('email')?.invalid && emp.get('email')?.touched">
+              {{ 'BULK_EDIT.ERR_EMAIL_INVALID' | translate }}
+            </small>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-field phone-field">
+            <label>{{ 'EMPLOYEE_EDIT.PHONE' | translate }}</label>
+            <div class="phone-input">
+              <select formControlName="countryCode">
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+61">🇦🇺 +61</option>
+              </select>
+              <input type="text" formControlName="phone" maxlength="10" [placeholder]="'BULK_EDIT.PLACEHOLDER_PHONE' | translate" />
+            </div>
+            <small class="error-text" *ngIf="emp.get('phone')?.invalid && emp.get('phone')?.touched">
+              {{ 'BULK_EDIT.ERR_PHONE_INVALID' | translate }}
+            </small>
+          </div>
+
+          <!-- Designation -->
+          <div class="form-field">
+            <label>{{ 'EMPLOYEE_EDIT.DESIGNATION' | translate }}</label>
+            <select formControlName="designation">
+              <option value="" disabled>{{ 'BULK_EDIT.SELECT_DESIGNATION' | translate }}</option>
+              <option *ngFor="let des of designations" [value]="des">{{ des }}</option>
+            </select>
+          </div>
+
+          <!-- Department -->
+          <div class="form-field">
+            <label>{{ 'EMPLOYEE_EDIT.DEPARTMENT' | translate }}</label>
+            <select formControlName="departmentId">
+              <option value="" disabled>{{ 'BULK_EDIT.SELECT_DEPARTMENT' | translate }}</option>
+              <option *ngFor="let dept of departments" [value]="dept.id">{{ dept.name }}</option>
+            </select>
+          </div>
+
+          <!-- Salary -->
+          <div class="form-field">
+            <label>{{ 'EMPLOYEE_EDIT.SALARY' | translate }}</label>
+            <input type="number" formControlName="salary" [placeholder]="'BULK_EDIT.PLACEHOLDER_SALARY' | translate" />
+            <small class="error-text" *ngIf="emp.get('salary')?.invalid && emp.get('salary')?.touched">
+              {{ 'BULK_EDIT.ERR_SALARY_INVALID' | translate }}
+            </small>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <div class="actions">
+    <button type="button" class="primary-btn submit-btn" (click)="openConfirmPopup()" [disabled]="employeesForm.invalid || !employeesForm.dirty">
+      <svg class="btn-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+      </svg>
+      {{ 'BULK_EDIT.SUBMIT_BTN' | translate }}
+    </button>
+  </div>
+</div>
+
+<!-- Confirmation Popup Modal with Backdrop Blur -->
+<div class="modal-backdrop" *ngIf="showConfirmPopup" (click)="cancelConfirm()">
+  <div class="confirm-popup" (click)="$event.stopPropagation()">
+    <p>{{ 'BULK_EDIT.CONFIRM_MSG' | translate }}</p>
+    <ul class="email-confirm-list">
+      <li *ngFor="let email of confirmEmails">{{ email }}</li>
+    </ul>
+    <div class="confirm-actions">
+      <button class="confirm-btn" (click)="confirmBulkUpdate()">{{ 'BULK_EDIT.YES_UPDATE' | translate }}</button>
+      <button class="cancel-btn" (click)="cancelConfirm()">{{ 'BULK_EDIT.CANCEL' | translate }}</button>
+    </div>
+  </div>
+</div>

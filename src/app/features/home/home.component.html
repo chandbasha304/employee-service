@@ -1,0 +1,47 @@
+<div class="home-page">
+
+  <!-- Login view -->
+  <div *ngIf="activeView === 'login'">
+    <app-login></app-login>
+    <button class="secondary-btn back-btn" (click)="backToHome()">⬅ {{ 'HOME.BACK' | translate }}</button>
+  </div>
+
+  <!-- Signup view -->
+  <div *ngIf="activeView === 'signup'">
+    <app-signup></app-signup>
+    <button class="secondary-btn back-btn" (click)="backToHome()">⬅ {{ 'HOME.BACK' | translate }}</button>
+  </div>
+
+  <!-- Home view -->
+  <div *ngIf="activeView === 'home'">
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1>{{ 'HOME.TITLE' | translate }}</h1>
+        <p>{{ 'HOME.DESCRIPTION' | translate }}</p>
+
+        <div class="hero-buttons">
+          <button class="login-btn" (click)="toggleLogin()">{{ 'HOME.LOGIN' | translate }}</button>
+          <button class="signup-btn" (click)="toggleSignUp()">{{ 'HOME.SIGNUP' | translate }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="features-section">
+      <div class="feature-card">
+        <h3>{{ 'HOME.FEATURE_AUTH' | translate }}</h3>
+        <p>{{ 'HOME.FEATURE_AUTH_DESC' | translate }}</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>{{ 'HOME.FEATURE_EMP' | translate }}</h3>
+        <p>{{ 'HOME.FEATURE_EMP_DESC' | translate }}</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>{{ 'HOME.FEATURE_UI' | translate }}</h3>
+        <p>{{ 'HOME.FEATURE_UI_DESC' | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>

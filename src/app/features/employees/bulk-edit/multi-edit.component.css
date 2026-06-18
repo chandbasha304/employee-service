@@ -1,0 +1,147 @@
+.subtitle-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: -16px;
+  margin-bottom: 24px;
+}
+
+.bulk-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-array-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Individual card row styles */
+.employee-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scaleUp 0.3s ease;
+}
+
+.employee-card:hover {
+  background: #ffffff;
+  border-color: rgba(79, 70, 229, 0.25);
+  box-shadow: var(--shadow-md);
+}
+
+/* Row card header styles */
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.row-badge {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid rgba(79, 70, 229, 0.15);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Fields Grid inside card */
+.card-grid-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.phone-field .phone-input {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-field select {
+  width: auto;
+  min-width: 85px;
+  padding: 10px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  padding-right: 28px;
+}
+
+.phone-field input {
+  flex: 1;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.error-text::before {
+  content: "⚠️";
+  font-size: 11px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 24px;
+}
+
+.btn-svg {
+  width: 16px;
+  height: 16px;
+}
+
+.text-indigo {
+  color: var(--primary);
+}
+
+/* Modal details list for emails */
+.email-confirm-list {
+  text-align: left;
+  font-size: 14px;
+  margin: 0 auto 16px auto;
+  max-width: 280px;
+  color: var(--text-muted);
+  padding-left: 20px;
+}
+
+.email-confirm-list li {
+  margin-bottom: 4px;
+}

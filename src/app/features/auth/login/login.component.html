@@ -1,0 +1,55 @@
+<div class="login-page">
+  <div class="login-card">
+    <h1>{{ 'LOGIN.WELCOME_BACK' | translate }}</h1>
+    <p>{{ 'LOGIN.CONTINUE' | translate }}</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Email -->
+      <div class="form-group">
+        <label>{{ 'LOGIN.EMAIL' | translate }}</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="{{ 'LOGIN.EMAIL' | translate }}"
+        >
+        <small *ngIf="email?.touched && email?.errors?.['required']">
+          Email is required
+        </small>
+        <small *ngIf="email?.touched && email?.errors?.['email']">
+          Enter a valid email address
+        </small>
+        <small *ngIf="email?.touched && email?.errors?.['maxlength']">
+          Email cannot exceed 100 characters
+        </small>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label>{{ 'LOGIN.PASSWORD' | translate }}</label>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="{{ 'LOGIN.PASSWORD' | translate }}"
+        >
+        <small *ngIf="password?.touched && password?.errors?.['required']">
+          Password is required
+        </small>
+        <small *ngIf="password?.touched && password?.errors?.['minlength']">
+          Minimum 8 characters required
+        </small>
+        <small *ngIf="password?.touched && password?.errors?.['maxlength']">
+          Maximum 64 characters allowed
+        </small>
+        <small *ngIf="password?.touched && password?.errors?.['strongPassword']">
+          Must include uppercase, lowercase, number, and special character
+        </small>
+      </div>
+
+      <button type="submit" [disabled]="loading || loginForm.invalid">
+        {{ loading ? ('LOGIN.CHECKING' | translate) : ('LOGIN.SUBMIT' | translate) }}
+      </button>
+    </form>
+  </div>
+</div>
+
