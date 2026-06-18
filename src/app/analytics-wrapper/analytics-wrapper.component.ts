@@ -32,7 +32,7 @@ export class AnalyticsWrapperComponent implements OnInit, OnDestroy {
       .catch((err) => {
         console.error('[MFE-Host] AnalyticsWrapperComponent: React script load promise rejected!', err);
         this.loading = false;
-        this.errorMessage = 'Failed to load the Analytics dashboard. Please ensure the React app is running on http://localhost:3000';
+        this.errorMessage = 'Failed to load the Analytics dashboard. Please ensure the React app is running on port 3001.';
       });
   }
 
@@ -62,10 +62,12 @@ export class AnalyticsWrapperComponent implements OnInit, OnDestroy {
         return;
       }
       console.log(this.scriptId + "------------------->Script Id");
-      console.log('[MFE-Host] loadReactScript: Appending script tag for React bundle: http://localhost:3000/bundle.js');
+      const host = window.location.hostname;
+      const scriptUrl = `http://${host}:3001/bundle.js`;
+      console.log('[MFE-Host] loadReactScript: Appending script tag for React bundle: ' + scriptUrl);
       const script = document.createElement('script');
       script.id = this.scriptId;
-      script.src = 'http://localhost:3000/bundle.js';
+      script.src = scriptUrl;
       script.async = true;
       script.onload = () => {
         console.log('[MFE-Host] loadReactScript: bundle.js script tag loaded successfully.');

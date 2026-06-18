@@ -27,3 +27,10 @@ services:
       - "${FRONTEND_PORT:-80}:80"
     depends_on:
       - ems-backend
+
+  ems-analytics:
+    image: us-central1-docker.pkg.dev/prefab-lamp-498812-u8/ems-repo/ems-analytics:latest
+    container_name: ems-analytics
+    restart: always
+    ports:
+      - "${ANALYTICS_PORT:-3001}:80"
