@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+        pollSCM('H/2 * * * *')
+    }
+
     environment {
         PROJECT_ID = 'prefab-lamp-498812-u8'
         REGION = 'us-central1'
@@ -18,6 +23,25 @@ pipeline {
                     branch: 'main'
 
                 echo '=== Checkout Completed ==='
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                echo '=== Running Frontend Unit Tests ==='
+                sh '''
+                    npm install
+                    npm run test
+                '''
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                echo '=== Building Angular Application ==='
+                sh '''
+                    npm run build
+                '''
             }
         }
 

@@ -1,17 +1,17 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AnalyticsWrapperComponent } from './analytics-wrapper.component';
 
-import { AnalyticsWrapper } from './analytics-wrapper';
-
-describe('AnalyticsWrapper', () => {
-  let component: AnalyticsWrapper;
-  let fixture: ComponentFixture<AnalyticsWrapper>;
+describe('AnalyticsWrapperComponent', () => {
+  let component: AnalyticsWrapperComponent;
+  let fixture: ComponentFixture<AnalyticsWrapperComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AnalyticsWrapper],
+      imports: [AnalyticsWrapperComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AnalyticsWrapper);
+    fixture = TestBed.createComponent(AnalyticsWrapperComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

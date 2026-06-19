@@ -22,6 +22,7 @@ export class MultiEditComponent implements OnInit {
   designations: string[] = [];
   showConfirmPopup = false;
   confirmEmails: string[] = [];
+  selectedEmployees: EmployeeResponseDto[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -30,7 +31,11 @@ export class MultiEditComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    const navigation = this.router.getCurrentNavigation();
+    this.selectedEmployees = navigation?.extras.state?.['employees'] || history.state?.employees || [];
+    console.log('Constructed MultiEditComponent. Selected employees:', this.selectedEmployees);
+  }
 
   get employeesArray(): FormArray {
     return this.employeesForm.get('employees') as FormArray;
@@ -39,7 +44,7 @@ export class MultiEditComponent implements OnInit {
   ngOnInit(): void {
     this.employeesForm = this.fb.group({ employees: this.fb.array([]) });
 
-    console.log('BulkEditComponent initialized');
+    console.log('BulkEditComponent initialized. Selected employees to process:', this.selectedEmployees);
 
     this.employeeService.getDepartments().subscribe({
       next: (depts) => {
@@ -51,10 +56,12 @@ export class MultiEditComponent implements OnInit {
             this.designations = desigs;
             console.log('Designations loaded:', this.designations);
 
-            const employees: EmployeeResponseDto[] = history.state.employees || [];
-            console.log('Employees passed from list:', employees);
-
-            employees.forEach(emp => this.addEmployeeRow(emp));
+            if (this.selectedEmployees && this.selectedEmployees.length > 0) {
+              this.selectedEmployees.forEach(emp => this.addEmployeeRow(emp));
+            } else {
+              console.warn('No selected employees found in class state.');
+            }
+            this.cdr.detectChanges();
           }
         });
       }

@@ -1,19 +1,33 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DepartmentComponent } from './department.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { DepartmentService } from '../../core/services/department.service';
+import { of } from 'rxjs';
 
-import { Department } from './department';
-
-describe('Department', () => {
-  let component: Department;
-  let fixture: ComponentFixture<Department>;
+describe('DepartmentComponent', () => {
+  let component: DepartmentComponent;
+  let fixture: ComponentFixture<DepartmentComponent>;
+  let mockDepartmentService: any;
 
   beforeEach(async () => {
+    mockDepartmentService = {
+      getDepartments: () => of({ content: [] })
+    };
+
     await TestBed.configureTestingModule({
-      imports: [Department],
+      imports: [
+        DepartmentComponent,
+        TranslateModule.forRoot()
+      ],
+      providers: [
+        { provide: DepartmentService, useValue: mockDepartmentService }
+      ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Department);
+    fixture = TestBed.createComponent(DepartmentComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {
