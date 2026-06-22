@@ -1,0 +1,20 @@
+{
+  "/employee-service": {
+    "target": "http://35.188.72.127:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/department-service": {
+    "target": "http://35.188.72.127:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/analytics-mfe": {
+    "target": "http://35.188.72.127:3001",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/analytics-mfe": ""
+    }
+  }
+}

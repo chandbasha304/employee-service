@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, Abs
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ChangeDetectorRef } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { EmployeeService, Department } from '../../../core/services/employee.service';
 import { EmployeeResponseDto } from '../../../core/models/employee-response.model';
 import { EmployeeRequestDto } from '../../../core/models/employee-request.model';
@@ -46,24 +47,38 @@ export class MultiEditComponent implements OnInit {
 
     console.log('BulkEditComponent initialized. Selected employees to process:', this.selectedEmployees);
 
-    this.employeeService.getDepartments().subscribe({
-      next: (depts) => {
+    // Populate UI immediately so user sees the cards/rows right away!
+    if (this.selectedEmployees && this.selectedEmployees.length > 0) {
+      this.selectedEmployees.forEach(emp => this.addEmployeeRow(emp));
+    } else {
+      console.warn('No selected employees found in class state.');
+    }
+    this.cdr.detectChanges();
+
+    // Fetch dropdowns in parallel without blocking UI population
+    forkJoin({
+      depts: this.employeeService.getDepartments(),
+      desigs: this.employeeService.getDesignations()
+    }).subscribe({
+      next: ({ depts, desigs }) => {
         this.departments = depts;
+        this.designations = desigs;
         console.log('Departments loaded:', this.departments);
+        console.log('Designations loaded:', this.designations);
 
-        this.employeeService.getDesignations().subscribe({
-          next: (desigs) => {
-            this.designations = desigs;
-            console.log('Designations loaded:', this.designations);
-
-            if (this.selectedEmployees && this.selectedEmployees.length > 0) {
-              this.selectedEmployees.forEach(emp => this.addEmployeeRow(emp));
-            } else {
-              console.warn('No selected employees found in class state.');
-            }
-            this.cdr.detectChanges();
+        // Since departments are now loaded, map the department name to its ID
+        this.employeesArray.controls.forEach((control, index) => {
+          const emp = this.selectedEmployees[index];
+          if (emp) {
+            const deptId = this.departments.find(d => d.name === emp.departmentName)?.id;
+            control.get('departmentId')?.setValue(deptId);
           }
         });
+
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading configuration data in parallel:', err);
       }
     });
   }
@@ -147,4 +162,3 @@ export class MultiEditComponent implements OnInit {
     return emailRegex.test(value) ? null : { emailInvalid: true };
   }
 }
-

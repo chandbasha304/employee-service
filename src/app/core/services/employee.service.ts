@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
-import { map } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 import { EmployeeResponseDto }
 from '../models/employee-response.model';
@@ -30,6 +30,8 @@ export interface Department {
 })
 export class EmployeeService {
 
+  private departments$?: Observable<Department[]>;
+  private designations$?: Observable<string[]>;
 
     private apiUrl =
 `${environment.apiBaseUrl}/api/employees`;
@@ -100,22 +102,29 @@ export class EmployeeService {
 
   getDepartments():
   Observable<Department[]> {
-
-    return this.http.get<{
-      content: Department[]
-    }>(
-      this.deptUrl
-    ).pipe(
-      map(res => res.content)
-    );
+    if (!this.departments$) {
+      this.departments$ = this.http.get<{
+        content: Department[]
+      }>(
+        this.deptUrl
+      ).pipe(
+        map(res => res.content),
+        shareReplay(1)
+      );
+    }
+    return this.departments$;
   }
 
   getDesignations():
   Observable<string[]> {
-
-    return this.http.get<string[]>(
-      this.designationUrl
-    );
+    if (!this.designations$) {
+      this.designations$ = this.http.get<string[]>(
+        this.designationUrl
+      ).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.designations$;
   }
 
 

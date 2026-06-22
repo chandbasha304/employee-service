@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { log } from 'console';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-analytics-wrapper',
@@ -62,8 +62,8 @@ export class AnalyticsWrapperComponent implements OnInit, OnDestroy {
         return;
       }
       console.log(this.scriptId + "------------------->Script Id");
-      const host = window.location.hostname;
-      const scriptUrl = `http://${host}:3001/bundle.js`;
+      
+      const scriptUrl = '/analytics-mfe/bundle.js';
       console.log('[MFE-Host] loadReactScript: Appending script tag for React bundle: ' + scriptUrl);
       const script = document.createElement('script');
       script.id = this.scriptId;

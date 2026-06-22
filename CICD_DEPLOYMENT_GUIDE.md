@@ -35,7 +35,7 @@ pipeline {
         
         // VM deployment details
         VM_USER = 'bashasoft304'
-        VM_IP = '34.59.200.251'
+        VM_IP = '35.188.72.127'
     }
 
     stages {
