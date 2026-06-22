@@ -95,12 +95,17 @@ export class EmployeeEditComponent implements OnInit {
     this.employeeService.getEmployee(this.employeeId).subscribe(emp => {
       const dept = this.departments.find(d => d.name === emp.departmentName);
       
+      // Robust phone parsing
       const phoneStr = emp.phone || '';
+      const digits = phoneStr.replace(/\D/g, '');
       let countryCode = '+91';
-      let phone = phoneStr;
-      if (phoneStr.startsWith('+')) {
-        countryCode = phoneStr.substring(0, 3);
-        phone = phoneStr.substring(3);
+      let phone = digits;
+      if (digits.length === 12 && digits.startsWith('91')) {
+        countryCode = '+91';
+        phone = digits.substring(2);
+      } else if (digits.length > 10) {
+        phone = digits.slice(-10);
+        countryCode = '+' + digits.substring(0, digits.length - 10);
       }
 
       this.editForm.patchValue({

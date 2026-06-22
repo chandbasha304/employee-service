@@ -87,13 +87,26 @@ export class MultiEditComponent implements OnInit {
     const deptId = this.departments.find(d => d.name === emp.departmentName)?.id;
     console.log(`Mapping employee ${emp.id} departmentName=${emp.departmentName} → departmentId=${deptId}`);
 
+    // Robust phone parsing
+    const phoneStr = emp.phone || '';
+    const digits = phoneStr.replace(/\D/g, '');
+    let countryCode = '+91';
+    let phone = digits;
+    if (digits.length === 12 && digits.startsWith('91')) {
+      countryCode = '+91';
+      phone = digits.substring(2);
+    } else if (digits.length > 10) {
+      phone = digits.slice(-10);
+      countryCode = '+' + digits.substring(0, digits.length - 10);
+    }
+
     const formGroup = this.fb.group({
       id: [emp.id],
       firstName: [emp.firstName, Validators.required],
       lastName: [emp.lastName, Validators.required],
       email: [emp.email, [Validators.required, this.strictEmailValidator]],
-      countryCode: [emp.phone?.substring(0, 3) || '+91', Validators.required],
-      phone: [emp.phone?.substring(3) || '', [
+      countryCode: [countryCode, Validators.required],
+      phone: [phone, [
         Validators.required,
         Validators.pattern('^[0-9]{10}$')
       ]],
