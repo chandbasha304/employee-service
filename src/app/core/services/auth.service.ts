@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { EmployeeService } from './employee.service';
+import { PresenceService } from './presence.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class AuthService {
   constructor(
     private http: HttpClient, 
     private router: Router,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private presenceService: PresenceService
   ) {}
 
   login(request: any): Observable<any> {
@@ -39,6 +41,12 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+    // Clear presence first (non-blocking)
+    this.presenceService.clearPresence().subscribe({
+      next: () => {},
+      error: () => {}
+    });
+
     return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
       tap(() => {
         this.clearSession();

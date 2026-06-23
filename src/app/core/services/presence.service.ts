@@ -46,6 +46,23 @@ export class PresenceService {
 
   constructor(private http: HttpClient) {
     this.startPresenceAndLockPolling();
+    this.registerTabCloseHandler();
+  }
+
+  private registerTabCloseHandler(): void {
+    window.addEventListener('beforeunload', () => {
+      const token = sessionStorage.getItem('token');
+      if (token) {
+        // Send a synchronous beacon/keepalive fetch to immediately clear presence from Firestore
+        fetch(`${this.apiUrl}/presence`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          keepalive: true
+        });
+      }
+    });
   }
 
   updatePresence(page: string): void {
@@ -105,5 +122,14 @@ export class PresenceService {
     if (this.pollingSub) {
       this.pollingSub.unsubscribe();
     }
+  }
+
+  clearPresence(): Observable<any> {
+    this.stopPolling();
+    this.onlineUsers.next([]);
+    if (!sessionStorage.getItem('token')) return of(null);
+    return this.http.delete(`${this.apiUrl}/presence`).pipe(
+      catchError(() => of(null))
+    );
   }
 }

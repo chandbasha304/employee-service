@@ -35,6 +35,8 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   activeLocks: Lock[] = [];
   activityLogs: ActivityLog[] = [];
   showActivityFeed = false;
+  unreadCount = 0;
+  private seenLogIds = new Set<string>();
   private locksSub?: Subscription;
   private logsSub?: Subscription;
 
@@ -86,6 +88,12 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     // Subscribe to live activity stream
     this.logsSub = this.presenceService.activityStream$.subscribe(logs => {
       this.activityLogs = logs;
+      if (this.showActivityFeed) {
+        logs.forEach(log => this.seenLogIds.add(log.id));
+        this.unreadCount = 0;
+      } else {
+        this.unreadCount = logs.filter(log => !this.seenLogIds.has(log.id)).length;
+      }
     });
   }
 
@@ -100,6 +108,10 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
 
   toggleActivityFeed(): void {
     this.showActivityFeed = !this.showActivityFeed;
+    if (this.showActivityFeed) {
+      this.unreadCount = 0;
+      this.activityLogs.forEach(log => this.seenLogIds.add(log.id));
+    }
   }
 
   loadEmployees() {
