@@ -28,3 +28,6 @@ steps:
 images:
   - 'us-central1-docker.pkg.dev/prefab-lamp-498812-u8/ems-repo/ems-frontend:$BRANCH_NAME'
   - 'us-central1-docker.pkg.dev/prefab-lamp-498812-u8/ems-repo/ems-frontend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
