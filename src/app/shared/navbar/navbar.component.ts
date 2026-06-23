@@ -3,6 +3,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
+import { PresenceService, Presence } from '../../core/services/presence.service';
 
 @Component({
   selector: 'app-navbar',
@@ -17,19 +18,32 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
+  onlineUsers: Presence[] = [];
 
   ngOnInit() {
-  console.log('NavbarComponent loaded');
-}
+    console.log('NavbarComponent loaded');
+  }
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private presenceService: PresenceService
   ) {
     this.translate.setDefaultLang('en');
     const savedLang = localStorage.getItem('lang') || 'en';
     this.translate.use(savedLang);
+
+    // Subscribe to online users
+    this.presenceService.onlineUsers$.subscribe(users => {
+      this.onlineUsers = users;
+    });
+  }
+
+  getOnlineUsersTooltip(): string {
+    return this.onlineUsers
+      .map(u => `${u.email} (${u.activePage})`)
+      .join('\n');
   }
 
   changeLanguageEvent(event: Event) {

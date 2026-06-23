@@ -1,13 +1,14 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { EmployeeService, Department } from '../../../core/services/employee.service';
 import { Employee } from '../../../core/models/employee.model';
 import { RouterModule } from '@angular/router';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, debounceTime, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastService } from '../../../core/services/toast.service';
+import { PresenceService, Lock, ActivityLog } from '../../../core/services/presence.service';
 
 @Component({
   selector: 'app-employee-list',
@@ -16,7 +17,7 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css']
 })
-export class EmployeeListComponent implements OnInit {
+export class EmployeeListComponent implements OnInit, OnDestroy {
   employees = signal<Employee[]>([]);
   departments: Department[] = [];
   editForm!: FormGroup;
@@ -30,6 +31,13 @@ export class EmployeeListComponent implements OnInit {
   searchTerm = '';
   loading = signal(false);
 
+  // Collaboration variables
+  activeLocks: Lock[] = [];
+  activityLogs: ActivityLog[] = [];
+  showActivityFeed = false;
+  private locksSub?: Subscription;
+  private logsSub?: Subscription;
+
   private searchSubject = new Subject<string>();
 
   constructor(
@@ -37,7 +45,8 @@ export class EmployeeListComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private location: Location,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private presenceService: PresenceService
   ) {
     this.searchSubject.pipe(debounceTime(1000)).subscribe(term => {
       console.log('Debounce fired at:', new Date().toLocaleTimeString(), 'with term:', term);
@@ -65,6 +74,32 @@ export class EmployeeListComponent implements OnInit {
 
     this.loadEmployees();
     this.loadDepartments();
+
+    // Register active presence
+    this.presenceService.updatePresence('Employee Directory');
+
+    // Subscribe to real-time locks
+    this.locksSub = this.presenceService.activeLocks$.subscribe(locks => {
+      this.activeLocks = locks;
+    });
+
+    // Subscribe to live activity stream
+    this.logsSub = this.presenceService.activityStream$.subscribe(logs => {
+      this.activityLogs = logs;
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.locksSub) this.locksSub.unsubscribe();
+    if (this.logsSub) this.logsSub.unsubscribe();
+  }
+
+  getEmployeeLock(id: number): Lock | undefined {
+    return this.activeLocks.find(l => l.employeeId === id);
+  }
+
+  toggleActivityFeed(): void {
+    this.showActivityFeed = !this.showActivityFeed;
   }
 
   loadEmployees() {
@@ -219,12 +254,43 @@ export class EmployeeListComponent implements OnInit {
   showBulkDeletePopup = false;
   bulkDeleteEmails: string[] = [];
 
+  getCurrentUserEmail(): string {
+    const token = sessionStorage.getItem('token');
+    if (!token) return '';
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const base64Url = parts[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map((c) => {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const payload = JSON.parse(jsonPayload);
+        return payload.sub || payload.email || '';
+      }
+    } catch (e) {
+      console.error('Failed to decode token', e);
+    }
+    return '';
+  }
+
   deleteSelected() {
     if (this.selectedIds.length === 0) return;
-    this.bulkDeleteEmails = this.employees()
-      .filter(e => this.selectedIds.includes(e.id))
-      .map(e => e.email);
+    
+    const selectedEmployees = this.employees().filter(e => this.selectedIds.includes(e.id));
+    const currentUserEmail = this.getCurrentUserEmail();
+    const lockedEmployees = selectedEmployees.filter(emp => {
+      const lock = this.getEmployeeLock(emp.id);
+      return lock && lock.lockedBy !== currentUserEmail;
+    });
 
+    if (lockedEmployees.length > 0) {
+      const lockedNames = lockedEmployees.map(e => `${e.firstName} ${e.lastName}`).join(', ');
+      this.toastService.error(`Cannot delete: Locked profiles are currently being edited: ${lockedNames}`);
+      return;
+    }
+
+    this.bulkDeleteEmails = selectedEmployees.map(e => e.email);
     this.showBulkDeletePopup = true;
   }
 
@@ -256,6 +322,18 @@ export class EmployeeListComponent implements OnInit {
     }
 
     const selectedEmployees = this.employees().filter(e => this.selectedIds.includes(e.id));
+    const currentUserEmail = this.getCurrentUserEmail();
+    const lockedEmployees = selectedEmployees.filter(emp => {
+      const lock = this.getEmployeeLock(emp.id);
+      return lock && lock.lockedBy !== currentUserEmail;
+    });
+
+    if (lockedEmployees.length > 0) {
+      const lockedNames = lockedEmployees.map(e => `${e.firstName} ${e.lastName}`).join(', ');
+      this.toastService.error(`Cannot edit: Locked profiles are currently being edited: ${lockedNames}`);
+      return;
+    }
+
     console.log('Navigating to bulk edit with employees:', selectedEmployees);
 
     this.router.navigate(['/employees/bulk-edit'], {

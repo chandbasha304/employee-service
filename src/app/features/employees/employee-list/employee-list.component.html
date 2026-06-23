@@ -48,6 +48,15 @@
         </svg>
         {{ 'EMPLOYEE_LIST.DELETE_SELECTED' | translate }}
       </button>
+
+      <!-- Live Operations Feed Button -->
+      <button (click)="toggleActivityFeed()" class="secondary-btn activity-feed-btn">
+        <svg class="btn-svg text-indigo" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        Feed
+        <span class="activity-badge" *ngIf="activityLogs.length > 0">{{ activityLogs.length }}</span>
+      </button>
     </div>
   </div>
 
@@ -93,15 +102,27 @@
           <td class="font-bold text-slate-800">{{ employee.salary | currency:'INR' }}</td>
           <td class="text-center">
             <div class="action-buttons">
-              <!-- Edit Action -->
-              <button class="icon-btn edit-btn" [routerLink]="['/employees/edit', employee.id]" title="Edit Employee">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </button>
+              <!-- Edit Action or Padlock -->
+              <ng-container *ngIf="getEmployeeLock(employee.id) as lock; else editAllowed">
+                <button class="icon-btn edit-btn locked-btn" [title]="'Locked by ' + lock.lockedBy" disabled>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="lock-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </button>
+              </ng-container>
+              <ng-template #editAllowed>
+                <button class="icon-btn edit-btn" [routerLink]="['/employees/edit', employee.id]" title="Edit Employee">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              </ng-template>
               
               <!-- Delete Action -->
-              <button class="icon-btn delete-btn" (click)="deleteEmployeePrompt(employee)" title="Delete Employee">
+              <button class="icon-btn delete-btn" 
+                      (click)="deleteEmployeePrompt(employee)"
+                      [disabled]="getEmployeeLock(employee.id) ? true : false"
+                      [title]="getEmployeeLock(employee.id) ? 'Locked profile cannot be deleted' : 'Delete Employee'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -184,5 +205,30 @@
     </div>
   </div>
 </div>
-        
 
+<!-- Real-Time Activity Feed Drawer -->
+<div class="activity-drawer" [class.open]="showActivityFeed">
+  <div class="drawer-header">
+    <h3>HR Operations Feed</h3>
+    <button class="close-drawer-btn" (click)="toggleActivityFeed()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  <div class="drawer-content">
+    <div *ngIf="activityLogs.length === 0" class="empty-feed">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="empty-feed-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v4.586a1 1 0 01-.293.707l-1.586 1.586A1 1 0 004 18h16a1 1 0 00.707-1.707l-1.586-1.586a1 1 0 01-.293-.707V13z" />
+      </svg>
+      <p>No recent operations logged.</p>
+    </div>
+    <div *ngFor="let log of activityLogs" class="activity-card" [ngClass]="log.severity?.toLowerCase() || 'info'">
+      <div class="activity-card-header">
+        <span class="activity-title">{{ log.title }}</span>
+        <span class="activity-time">{{ log.timestamp | date:'shortTime' }}</span>
+      </div>
+      <p class="activity-message">{{ log.message }}</p>
+    </div>
+  </div>
+</div>

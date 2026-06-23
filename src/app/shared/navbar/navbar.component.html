@@ -8,6 +8,10 @@
     </ng-container>
 
     <ng-container *ngIf="isLoggedIn()">
+      <div class="presence-indicator" *ngIf="onlineUsers.length > 0" [title]="getOnlineUsersTooltip()">
+        <span class="presence-dot"></span>
+        <span class="presence-count">{{ onlineUsers.length }} Active HR</span>
+      </div>
       <a routerLink="/analytics" routerLinkActive="active-link">{{ 'NAVBAR.ANALYTICS' | translate }}</a>
       <a routerLink="/department" routerLinkActive="active-link">{{ 'NAVBAR.DEPARTMENT' | translate }}</a>
       <a routerLink="/employees" routerLinkActive="active-link">{{ 'NAVBAR.EMPLOYEES' | translate }}</a>

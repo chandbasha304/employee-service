@@ -1,6 +1,7 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  OnDestroy
 } from '@angular/core';
 
 import { TranslateModule } from '@ngx-translate/core';
@@ -29,6 +30,7 @@ import {
   EmployeeRequestDto
 } from '../../../core/models/employee-request.model';
 import { ToastService } from '../../../core/services/toast.service';
+import { PresenceService } from '../../../core/services/presence.service';
 
 @Component({
   selector: 'app-employee-edit',
@@ -37,18 +39,20 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './employee-edit.component.html',
   styleUrls: ['./employee-edit.component.css']
 })
-export class EmployeeEditComponent implements OnInit {
+export class EmployeeEditComponent implements OnInit, OnDestroy {
   editForm!: FormGroup;
   departments: Department[] = [];
   designations: string[] = [];
   employeeId!: number;
+  private lockAcquired = false;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private employeeService: EmployeeService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private presenceService: PresenceService
   ) {}
 
   successMessage: string | null = null;
@@ -70,8 +74,21 @@ export class EmployeeEditComponent implements OnInit {
 
     this.employeeId = Number(this.route.snapshot.paramMap.get('id'));
 
-    this.loadDepartments();
-    this.loadDesignations();
+    // Register presence
+    this.presenceService.updatePresence(`Editing Employee #${this.employeeId}`);
+
+    // Try to acquire lock
+    this.presenceService.acquireLock(this.employeeId).subscribe({
+      next: () => {
+        this.lockAcquired = true;
+        this.loadDepartments();
+        this.loadDesignations();
+      },
+      error: (err) => {
+        // The conflict error message is toasted automatically by ErrorInterceptor
+        this.router.navigate(['/employees']);
+      }
+    });
   }
 
   loadDepartments(): void {
@@ -136,6 +153,7 @@ export class EmployeeEditComponent implements OnInit {
     this.employeeService.updateEmployee(this.employeeId, payload).subscribe({
       next: () => {
         this.toastService.success('Employee updated successfully');
+        this.releaseLock();
         this.router.navigate(['/employees']);
       },
       error: () => {
@@ -145,7 +163,23 @@ export class EmployeeEditComponent implements OnInit {
   }
 
   cancel(): void {
+    this.releaseLock();
     this.router.navigate(['/employees']);
+  }
+
+  ngOnDestroy(): void {
+    this.releaseLock();
+  }
+
+  private releaseLock(): void {
+    if (this.lockAcquired && this.employeeId) {
+      this.presenceService.releaseLock(this.employeeId).subscribe({
+        next: () => {
+          this.lockAcquired = false;
+        },
+        error: (err) => console.error('Failed to release lock', err)
+      });
+    }
   }
 }
 

@@ -3,6 +3,7 @@ import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { EmployeeService } from './employee.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,11 @@ export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/api/auth`;
   private loggedIn = false;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient, 
+    private router: Router,
+    private employeeService: EmployeeService
+  ) {}
 
   login(request: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, request).pipe(
@@ -19,6 +24,9 @@ export class AuthService {
         // ✅ Save token to sessionStorage
         sessionStorage.setItem('token', response.token);
         this.loggedIn = true;
+        
+        // ✅ Preload designations and departments cache
+        this.employeeService.preloadCache();
         
         // ✅ Redirect after login success
         this.router.navigate(['/employees']);
@@ -41,6 +49,7 @@ export class AuthService {
 
   clearSession(): void {
     sessionStorage.removeItem('token');
+    this.employeeService.clearCache();
     this.loggedIn = false;
   }
 

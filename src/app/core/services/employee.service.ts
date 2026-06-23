@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, tap } from 'rxjs/operators';
 
 import { EmployeeResponseDto }
 from '../models/employee-response.model';
@@ -55,7 +55,32 @@ export class EmployeeService {
 
   constructor(
     private http: HttpClient
-  ) {}
+  ) {
+    // If user is already logged in on app start, preload the cache
+    if (sessionStorage.getItem('token')) {
+      this.preloadCache();
+    }
+  }
+
+  preloadCache(): void {
+    console.log('Preloading departments and designations cache from EmployeeService...');
+    this.getDepartments(true).subscribe({
+      next: () => console.log('Departments preloaded successfully.'),
+      error: (err) => console.error('Failed to preload departments:', err)
+    });
+    this.getDesignations(true).subscribe({
+      next: () => console.log('Designations preloaded successfully.'),
+      error: (err) => console.error('Failed to preload designations:', err)
+    });
+  }
+
+  clearCache(): void {
+    console.log('Clearing departments and designations cache from EmployeeService...');
+    sessionStorage.removeItem('cached_departments');
+    sessionStorage.removeItem('cached_designations');
+    this.departments$ = undefined;
+    this.designations$ = undefined;
+  }
 
   getEmployees(
     page: number,
@@ -100,31 +125,49 @@ export class EmployeeService {
   );
 }
 
-  getDepartments():
+  getDepartments(forceRefresh = false):
   Observable<Department[]> {
-    if (!this.departments$) {
-      this.departments$ = this.http.get<{
-        content: Department[]
-      }>(
-        this.deptUrl
-      ).pipe(
-        map(res => res.content),
-        shareReplay(1)
-      );
+    if (!forceRefresh) {
+      const cached = sessionStorage.getItem('cached_departments');
+      if (cached) {
+        try {
+          return of(JSON.parse(cached));
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
     }
-    return this.departments$;
+    return this.http.get<{
+      content: Department[]
+    }>(
+      this.deptUrl
+    ).pipe(
+      map(res => res.content),
+      tap(depts => {
+        sessionStorage.setItem('cached_departments', JSON.stringify(depts));
+      })
+    );
   }
 
-  getDesignations():
+  getDesignations(forceRefresh = false):
   Observable<string[]> {
-    if (!this.designations$) {
-      this.designations$ = this.http.get<string[]>(
-        this.designationUrl
-      ).pipe(
-        shareReplay(1)
-      );
+    if (!forceRefresh) {
+      const cached = sessionStorage.getItem('cached_designations');
+      if (cached) {
+        try {
+          return of(JSON.parse(cached));
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
     }
-    return this.designations$;
+    return this.http.get<string[]>(
+      this.designationUrl
+    ).pipe(
+      tap(desigs => {
+        sessionStorage.setItem('cached_designations', JSON.stringify(desigs));
+      })
+    );
   }
 
 
